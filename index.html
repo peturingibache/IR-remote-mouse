@@ -27,72 +27,20 @@
     let port;
     let writer;
 
-    // IR signal file data (you can load this from an external source if needed)
     const irSignals = [
         { name: 'Power', address: '01 00 00 00', command: '15 00 00 00' },
         { name: 'Input', address: '01 00 00 00', command: '25 00 00 00' },
         { name: 'Home', address: '01 00 00 00', command: '60 00 00 00' },
         { name: 'Apps', address: 'C4 00 00 00', command: '2A 00 00 00' },
         { name: 'Tv', address: '01 00 00 00', command: '24 00 00 00' },
-        { name: 'Left', address: '01 00 00 00', command: '34 00 00 00' },
-        { name: 'Right', address: '01 00 00 00', command: '33 00 00 00' },
-        { name: 'Up', address: '01 00 00 00', command: '74 00 00 00' },
-        { name: 'Down', address: '01 00 00 00', command: '75 00 00 00' },
-        { name: 'Enter', address: '01 00 00 00', command: '65 00 00 00' },
-        { name: 'Back', address: '97 00 00 00', command: '23 00 00 00' },
-        { name: 'Mute', address: '01 00 00 00', command: '14 00 00 00' },
-        { name: 'Vol_up', address: '01 00 00 00', command: '12 00 00 00' },
-        { name: 'Vol_dn', address: '01 00 00 00', command: '13 00 00 00' },
-        { name: 'Ch_next', address: '01 00 00 00', command: '10 00 00 00' },
-        { name: 'Ch_prev', address: '01 00 00 00', command: '11 00 00 00' },
-        { name: 'Play', address: '97 00 00 00', command: '1A 00 00 00' },
-        { name: 'Pause', address: '97 00 00 00', command: '19 00 00 00' },
-        { name: 'Stop', address: '97 00 00 00', command: '18 00 00 00' },
-        { name: 'Fwd', address: '97 00 00 00', command: '1C 00 00 00' },
-        { name: 'Rew', address: '97 00 00 00', command: '1B 00 00 00' },
-        { name: 'Prev', address: '97 00 00 00', command: '3C 00 00 00' },
-        { name: 'Next', address: '97 00 00 00', command: '3D 00 00 00' },
-        { name: 'Rec', address: '97 00 00 00', command: '20 00 00 00' },
-        { name: 'Netflix', address: '1A 00 00 00', command: '7C 00 00 00' },
-        { name: 'Google_play', address: 'C4 00 00 00', command: '46 00 00 00' },
-        { name: 'Red', address: '97 00 00 00', command: '25 00 00 00' },
-        { name: 'Green', address: '97 00 00 00', command: '26 00 00 00' },
-        { name: 'Yellow', address: '97 00 00 00', command: '27 00 00 00' },
-        { name: 'Blue', address: '97 00 00 00', command: '24 00 00 00' },
-        { name: 'Action_menu', address: 'C4 00 00 00', command: '4B 00 00 00' },
-        { name: 'Guide', address: 'A4 00 00 00', command: '5B 00 00 00' },
-        { name: 'Help', address: 'C4 00 00 00', command: '4D 00 00 00' },
-        { name: 'Title_list', address: '1A 00 00 00', command: '65 00 00 00' },
-        { name: 'Audio', address: '01 00 00 00', command: '17 00 00 00' },
-        { name: 'Screen___', address: '97 00 00 00', command: '28 00 00 00' },
-        { name: 'Swap', address: '01 00 00 00', command: '3B 00 00 00' },
-        { name: 'Dig_analo', address: '77 00 00 00', command: '0D 00 00 00' },
-        { name: 'Tv_radio', address: '1A 00 00 00', command: '57 00 00 00' },
-        { name: 'Exit', address: '01 00 00 00', command: '63 00 00 00' },
-        { name: 'Ext_box_menu', address: 'C4 00 00 00', command: '49 00 00 00' },
-        { name: '1', address: '01 00 00 00', command: '00 00 00 00' },
-        { name: '2', address: '01 00 00 00', command: '01 00 00 00' },
-        { name: '3', address: '01 00 00 00', command: '02 00 00 00' },
-        { name: '4', address: '01 00 00 00', command: '03 00 00 00' },
-        { name: '5', address: '01 00 00 00', command: '04 00 00 00' },
-        { name: '6', address: '01 00 00 00', command: '05 00 00 00' },
-        { name: '7', address: '01 00 00 00', command: '06 00 00 00' },
-        { name: '8', address: '01 00 00 00', command: '07 00 00 00' },
-        { name: '9', address: '01 00 00 00', command: '08 00 00 00' },
-        { name: '0', address: '01 00 00 00', command: '09 00 00 00' },
-        { name: 'I_plus', address: '01 00 00 00', command: '3A 00 00 00' },
-        { name: 'Txt', address: '01 00 00 00', command: '3F 00 00 00' },
     ];
 
-    // Handle connect button click
     document.getElementById('connectButton').addEventListener('click', async () => {
         if ('serial' in navigator) {
             try {
-                // Request a port and open a connection
                 port = await navigator.serial.requestPort();
                 await port.open({ baudRate: 115200 });
                 writer = port.writable.getWriter();
-
                 document.getElementById('status').innerText = 'Connected to Arduino!';
             } catch (error) {
                 document.getElementById('status').innerText = 'Failed to connect to Arduino: ' + error;
@@ -102,7 +50,6 @@
         }
     });
 
-    // Dynamically generate buttons for each IR signal
     const buttonContainer = document.getElementById('button-container');
     irSignals.forEach(signal => {
         const button = document.createElement('button');
@@ -113,15 +60,11 @@
             const address = this.getAttribute('data-address');
             const command = this.getAttribute('data-command');
 
-            // Send the address and command to the Arduino via the serial connection
             if (port && writer) {
                 const message = `${address},${command}\n`;
                 const encoder = new TextEncoder();
                 const buffer = encoder.encode(message);
                 writer.write(buffer);
-                alert(`Command sent: ${command} to address ${address}`);
-            } else {
-                alert("Please connect to the Arduino first.");
             }
         });
         buttonContainer.appendChild(button);
