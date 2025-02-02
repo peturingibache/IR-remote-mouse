@@ -37,17 +37,18 @@
         
         // Default button configuration
         const defaultButtons = [
-            { name: "Power", address: "04 00 00 00", command: "08 00 00 00" },
+            { name: "Power", address: "01 00 00 00", command: "15 00 00 00" },
             { name: "Input", address: "01 00 00 00", command: "25 00 00 00" },
             { name: "Home", address: "01 00 00 00", command: "60 00 00 00" }
         ];
         
-        // Hardcoded arrow key commands
-        const arrowCommands = {
-            ArrowUp: { address: "04 00 00 00", command: "40 00 00 00" },
-            ArrowDown: { address: "04 00 00 00", command: "41 00 00 00" },
-            ArrowLeft: { address: "04 00 00 00", command: "07 00 00 00" },
-            ArrowRight: { address: "04 00 00 00", command: "06 00 00 00" }
+        // Hardcoded key commands mapping including arrow keys and Enter
+        const keyCommands = {
+            ArrowUp:    { address: "01 00 00 00", command: "74 00 00 00" },
+            ArrowDown:  { address: "01 00 00 00", command: "75 00 00 00" },
+            ArrowLeft:  { address: "01 00 00 00", command: "34 00 00 00" },
+            ArrowRight: { address: "01 00 00 00", command: "33 00 00 00" },
+            Enter:      { address: "01 00 00 00", command: "65 00 00 00" } // OK code mapping for Enter
         };
         
         // Function to send command via serial connection
@@ -117,11 +118,11 @@
             }
         });
         
-        // Listen for arrow key events to send corresponding commands
+        // Listen for keydown events for arrow keys and Enter
         window.addEventListener("keydown", function(e) {
-            if (arrowCommands[e.key]) {
-                e.preventDefault(); // Prevent default scrolling behavior
-                const { address, command } = arrowCommands[e.key];
+            if (keyCommands[e.key]) {
+                e.preventDefault(); // Prevent default behavior such as scrolling or form submission
+                const { address, command } = keyCommands[e.key];
                 sendCommand(address, command);
             }
         });
