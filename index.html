@@ -3,73 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IR Command Sender</title>
+    <title>IR Remote Control</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .button-container { margin-top: 20px; }
-        button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #status { margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>Send IR Commands</h2>
-
-    <!-- Button container -->
-    <div id="button-container" class="button-container"></div>
-
+    <h1>IR Remote Control</h1>
+    
+    <!-- File upload for custom button configuration -->
+    <input type="file" id="fileInput" accept=".txt">
+    <br><br>
+    
+    <!-- Arduino connect button -->
     <button id="connectButton">Connect to Arduino</button>
-    <p id="status"></p>
-</div>
-
-<script>
-    let port;
-    let writer;
-
-    const irSignals = [
-        { name: 'Power', address: '04 00 00 00', command: '08 00 00 00' },
-        { name: 'up', address: '04 00 00 00', command: '02 00 00 00' },
-        { name: 'Home', address: '04 00 00 00', command: '03 00 00 00' },
-        { name: 'Apps', address: 'C4 00 00 00', command: '2A 00 00 00' },
-        { name: 'Tv', address: '01 00 00 00', command: '24 00 00 00' },
-    ];
-
-    document.getElementById('connectButton').addEventListener('click', async () => {
-        if ('serial' in navigator) {
-            try {
-                port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 115200 });
-                writer = port.writable.getWriter();
-                document.getElementById('status').innerText = 'Connected to Arduino!';
-            } catch (error) {
-                document.getElementById('status').innerText = 'Failed to connect to Arduino: ' + error;
-            }
-        } else {
-            document.getElementById('status').innerText = 'Web Serial API is not supported by your browser.';
-        }
-    });
-
-    const buttonContainer = document.getElementById('button-container');
-    irSignals.forEach(signal => {
-        const button = document.createElement('button');
-        button.innerText = signal.name;
-        button.setAttribute('data-address', signal.address);
-        button.setAttribute('data-command', signal.command);
-        button.addEventListener('click', function() {
-            const address = this.getAttribute('data-address');
-            const command = this.getAttribute('data-command');
-
-            if (port && writer) {
+    <p id="status">Not connected</p>
+    
+    <!-- Container for the command buttons -->
+    <div class="button-container" id="buttonContainer"></div>
+    
+    <script>
+        let port;
+        let writer;
+        
+        // Default button configuration
+        const defaultButtons = [
+            { name: "Power", address: "01 00 00 00", command: "15 00 00 00" },
+            { name: "Input", address: "01 00 00 00", command: "25 00 00 00" },
+            { name: "Home", address: "01 00 00 00", command: "60 00 00 00" }
+        ];
+        
+        // Hardcoded arrow key commands
+        const arrowCommands = {
+            ArrowUp: { address: "01 00 00 00", command: "74 00 00 00" },
+            ArrowDown: { address: "01 00 00 00", command: "75 00 00 00" },
+            ArrowLeft: { address: "01 00 00 00", command: "34 00 00 00" },
+            ArrowRight: { address: "01 00 00 00", command: "33 00 00 00" }
+        };
+        
+        // Function to send command via serial connection
+        function sendCommand(address, command) {
+            if (writer) {
                 const message = `${address},${command}\n`;
                 const encoder = new TextEncoder();
-                const buffer = encoder.encode(message);
-                writer.write(buffer);
+                writer.write(encoder.encode(message));
+            } else {
+                alert("Please connect to the Arduino first.");
+            }
+        }
+        
+        // Function to create buttons from configuration
+        function createButtons(buttons) {
+            const container = document.getElementById("buttonContainer");
+            container.innerHTML = "";
+            buttons.forEach(btn => {
+                const button = document.createElement("button");
+                button.textContent = btn.name;
+                button.onclick = () => sendCommand(btn.address, btn.command);
+                container.appendChild(button);
+            });
+        }
+        
+        // File upload event to load custom button configuration
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const buttons = [];
+                let currentButton = {};
+                
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (line.startsWith("name:")) {
+                        currentButton = { name: line.split(": ")[1] };
+                    } else if (line.startsWith("address:")) {
+                        currentButton.address = line.split(": ")[1];
+                    } else if (line.startsWith("command:")) {
+                        currentButton.command = line.split(": ")[1];
+                        buttons.push(currentButton);
+                    }
+                });
+                
+                createButtons(buttons.length ? buttons : defaultButtons);
+            };
+            reader.readAsText(file);
+        });
+        
+        // Connect button event to open serial port
+        document.getElementById("connectButton").addEventListener("click", async () => {
+            if ('serial' in navigator) {
+                try {
+                    port = await navigator.serial.requestPort();
+                    await port.open({ baudRate: 115200 });
+                    writer = port.writable.getWriter();
+                    document.getElementById("status").innerText = "Connected";
+                } catch (error) {
+                    document.getElementById("status").innerText = "Failed to connect: " + error;
+                }
+            } else {
+                document.getElementById("status").innerText = "Web Serial API not supported.";
             }
         });
-        buttonContainer.appendChild(button);
-    });
-</script>
-
+        
+        // Listen for arrow key events to send corresponding commands
+        window.addEventListener("keydown", function(e) {
+            if (arrowCommands[e.key]) {
+                e.preventDefault(); // Prevent default scrolling behavior
+                const { address, command } = arrowCommands[e.key];
+                sendCommand(address, command);
+            }
+        });
+        
+        // Initialize with default buttons
+        createButtons(defaultButtons);
+    </script>
 </body>
 </html>
