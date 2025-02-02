@@ -37,17 +37,17 @@
         
         // Default button configuration
         const defaultButtons = [
-            { name: "Power", address: "01 00 00 00", command: "15 00 00 00" },
+            { name: "Power", address: "04 00 00 00", command: "08 00 00 00" },
             { name: "Input", address: "01 00 00 00", command: "25 00 00 00" },
             { name: "Home", address: "01 00 00 00", command: "60 00 00 00" }
         ];
         
         // Hardcoded arrow key commands
         const arrowCommands = {
-            ArrowUp: { address: "01 00 00 00", command: "74 00 00 00" },
-            ArrowDown: { address: "01 00 00 00", command: "75 00 00 00" },
-            ArrowLeft: { address: "01 00 00 00", command: "34 00 00 00" },
-            ArrowRight: { address: "01 00 00 00", command: "33 00 00 00" }
+            ArrowUp: { address: "04 00 00 00", command: "40 00 00 00" },
+            ArrowDown: { address: "04 00 00 00", command: "41 00 00 00" },
+            ArrowLeft: { address: "04 00 00 00", command: "07 00 00 00" },
+            ArrowRight: { address: "04 00 00 00", command: "06 00 00 00" }
         };
         
         // Function to send command via serial connection
